@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-
 extern void serial_putchar(char c);
 extern int serial_getchar(void);
 

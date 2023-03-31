@@ -3,11 +3,11 @@
 # Copyright 2022, Joe Xue(lgxue@hotmail.com)
 
 PROJ           = luaos
-SRCDIR         = src
+SRCDIR         = src lua-5.4.4
 BUILDDIR       = build
 SCRIPTDIR      = script
 
-SRC_NOT_BUILD  =
+SRC_NOT_BUILD  = lua-5.4.4/src/luac.c
 
 SRC            = $(filter-out $(SRC_NOT_BUILD), $(shell find $(SRCDIR) -name *.c -o -name *.S))
 OBJS           = $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SRC)))
@@ -23,7 +23,7 @@ CC             = $(CROSS_COMPILE)gcc
 all: $(BUILDDIR)/$(PROJ).elf
 
 $(BUILDDIR)/$(PROJ).elf: $(OBJS)
-	$(CC) -static -T $(SCRIPTDIR)/$(PROJ).ld $^ -nostdlib -lc -lgcc -o $@
+	$(CC) -static -T $(SCRIPTDIR)/$(PROJ).ld $^ -nostdlib -lc -lm -lgcc -o $@
 
 run: $(BUILDDIR)/$(PROJ).elf
 	@qemu-system-aarch64 \
