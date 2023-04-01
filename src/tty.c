@@ -15,6 +15,20 @@ int tty_read_in(char *ptr, int len)
             len = 0;
         }
 
+        /* delete */
+        if (c == 127) {
+            printf("\b \b");
+            fflush(stdout);
+            read--;
+            ptr--;
+            continue;
+        }
+
+        /* Ctrl-c */
+        if (c == 3) {
+            return EOF;
+        }
+
         /* echo back */
         putchar(c);
         fflush(stdout);

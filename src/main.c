@@ -1,9 +1,10 @@
 #include <stdio.h>
 
+extern void shell(void);
+
 void c_entry()
 {
-    printf("LUA-OS\n");
-
+    shell();
     while(1) {
         ;
     }
