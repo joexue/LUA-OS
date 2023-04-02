@@ -11,5 +11,5 @@ _Reset:
     orr x0, x1, x0
     msr cpacr_el1, x0
 
-    BL c_entry
+    BL init
     B .

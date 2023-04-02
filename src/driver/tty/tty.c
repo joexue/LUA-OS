@@ -8,32 +8,40 @@ int tty_read_in(char *ptr, int len)
     int read = 0;
     int c;
 
-    for (; len > 1; --len) {
+    for (; len > 0; len--) {
         c = serial_getchar();
-        if (c == '\r') {
-            c = '\n';
-            len = 0;
+        /* printable characters */
+        if ( c >= ' ' && c <= '~') {
+            putchar(c);
+            fflush(stdout);
+            *ptr++ = (char)c;
+            read++;
+            continue;
         }
 
         /* delete */
-        if (c == 127) {
+        if ( c == 127 ) {
             printf("\b \b");
             fflush(stdout);
-            read--;
-            ptr--;
+            ptr = (read > 0) ? ptr - 1 : ptr;
+            read = (read > 0) ? read - 1: 0;
             continue;
+        }
+
+        /* return */
+        if (c == '\r') {
+            c = '\n';
+            putchar(c);
+            fflush(stdout);
+            *ptr++ = c;
+            read++;
+            break;
         }
 
         /* Ctrl-c */
         if (c == 3) {
             return EOF;
         }
-
-        /* echo back */
-        putchar(c);
-        fflush(stdout);
-        *ptr++ = (char)c;
-        read++;
     }
 
     return read;

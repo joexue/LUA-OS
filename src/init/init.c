@@ -2,7 +2,7 @@
 
 extern void shell(void);
 
-void c_entry()
+void init()
 {
     shell();
     while(1) {
