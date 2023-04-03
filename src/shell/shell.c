@@ -20,11 +20,10 @@ typedef struct cmd_tbl_s {
     char        *help;
 } cmd_tbl_t;
 
+extern int echo_main(int argc, char **argv);
 static int cmd_echo(int argc, char *argv[])
 {
-    printf("%s\n", argv[1]);
-
-	return 0;
+    return echo_main(argc, argv);
 }
 
 static int cmd_lua(int argc, char *argv[])
@@ -100,6 +99,7 @@ void shell(void)
                 if (c == ' ' || c == '\n') {
                     line[i] = '\0';
                     argc++;
+                    argv[argc] = &line[i+1];
                 }
                 i++;
 
