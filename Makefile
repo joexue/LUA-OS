@@ -7,12 +7,12 @@ SRCDIR         = src lua-5.4.4
 BUILDDIR       = build
 SCRIPTDIR      = script
 
-SRC_NOT_BUILD  = lua-5.4.4/src/luac.c
+SRC_NOT_BUILD  = lua-5.4.4/src/luac.c lua-5.4.4/src/lua.c
 
 SRC            = $(filter-out $(SRC_NOT_BUILD), $(shell find $(SRCDIR) -name *.c -o -name *.S))
 OBJS           = $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SRC)))
 
-CFLAGS         = -g -Wall -MMD
+CFLAGS         = -g -Wall -MMD -Ilua-5.4.4/src
 
 SYSROOT        = /opt/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf/aarch64-none-elf
 CROSS_COMPILE  = $(SYSROOT)/../bin/aarch64-none-elf-

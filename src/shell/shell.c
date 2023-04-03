@@ -9,18 +9,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#undef main
+#define main(x, y) lua_main(x, y)
+#include <lua.c>
+#undef main
+
 typedef struct cmd_tbl_s {
     char        *name;
     int         (*cmd)(int argc, char *argv[]);
     char        *help;
 } cmd_tbl_t;
-
-static int cmd_hello(int argc, char *argv[])
-{
-	printf("Hello LUA-OS\n");
-
-	return 0;
-}
 
 static int cmd_echo(int argc, char *argv[])
 {
@@ -29,10 +27,9 @@ static int cmd_echo(int argc, char *argv[])
 	return 0;
 }
 
-extern int main (int argc, char **argv);
 static int cmd_lua(int argc, char *argv[])
 {
-    return main(argc, argv);
+    return lua_main(argc, argv);
 }
 
 extern const cmd_tbl_t  cmd_table[];
@@ -52,10 +49,9 @@ static int cmd_help(int argc, char *argv[])
 }
 
 const cmd_tbl_t  cmd_table[] = {
-    {"hello\n",	cmd_hello,	"Just print hello"},
-    {"echo\n",	cmd_echo,	"Echo parameters"},
-    {"?\n",	cmd_help,	    "Print command help info"},
-    {"lua\n",   cmd_lua,    "Run the lua interpreter"},
+    {"echo",	cmd_echo,	" Echo parameters"},
+    {"help",	cmd_help,	" Print command help info"},
+    {"lua",     cmd_lua,    "  Run the lua interpreter"},
     {NULL,	NULL, NULL}
 };
 
@@ -87,14 +83,29 @@ void shell(void)
 #define PROMPT  "LUA-OS # "
     char line[LINE];
     char *argv[PARAMS];
+    int argc;
+    int i;
+    char c;
 
     for (;;) {
         memset(line, 0, LINE);
         printf("%s", PROMPT);
         fflush(stdout);
         if (fgets(line, LINE, stdin) != NULL) {
-            argv[0] = line;
-            cmd_process(1, argv);
+            argc = 0;
+            i = 0;
+            argv[argc] = line;
+            do {
+                c = line[i];
+                if (c == ' ' || c == '\n') {
+                    line[i] = '\0';
+                    argc++;
+                }
+                i++;
+
+	        } while (c != '\0');
+
+            cmd_process(argc, argv);
         }
     }
 }
