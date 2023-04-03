@@ -38,6 +38,11 @@ int _fstat(int file, struct stat *st)
     return -1;
 }
 
+int _stat(char *file, struct stat *st)
+{
+    return 0;
+}
+
 int _isatty(int file)
 {
     if (file == 1 || file == 2) {

@@ -26,6 +26,12 @@ static int cmd_echo(int argc, char *argv[])
     return echo_main(argc, argv);
 }
 
+extern int ls_main(int argc, char **argv);
+static int cmd_ls(int argc, char *argv[])
+{
+    return ls_main(argc, argv);
+}
+
 static int cmd_lua(int argc, char *argv[])
 {
     return lua_main(argc, argv);
@@ -49,6 +55,7 @@ static int cmd_help(int argc, char *argv[])
 
 const cmd_tbl_t  cmd_table[] = {
     {"echo",	cmd_echo,	" Echo parameters"},
+    {"ls",      cmd_ls,     "   list the file/dir"},
     {"help",	cmd_help,	" Print command help info"},
     {"lua",     cmd_lua,    "  Run the lua interpreter"},
     {NULL,	NULL, NULL}
