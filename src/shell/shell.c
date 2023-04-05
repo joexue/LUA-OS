@@ -78,6 +78,11 @@ int cmd_process(int argc, char *argv[])
     if (!strcmp(argv[0], "\n")) {
         return 0;
     }
+
+    if (argv[0][0] == '\0') {
+        return 0;
+    }
+
 	printf("Error: command not found\n");
 	return -1;
 }

@@ -7,7 +7,7 @@ SRCDIR         = src lua-5.4.4
 BUILDDIR       = build
 SCRIPTDIR      = script
 
-SRC_NOT_BUILD  = lua-5.4.4/src/luac.c lua-5.4.4/src/lua.c
+SRC_NOT_BUILD  = lua-5.4.4/src/luac.c lua-5.4.4/src/lua.c src/driver/virtio/virtio_mmio.c src/driver/virtio/virtio_syscall.c
 
 SRC            = $(filter-out $(SRC_NOT_BUILD), $(shell find $(SRCDIR) -name *.c -o -name *.S))
 OBJS           = $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SRC)))
