@@ -1,34 +1,39 @@
-# Makefile for AOS
+# Makefile for Lua OS
 
-# Copyright 2022, Joe Xue(lgxue@hotmail.com)
+# Copyright 2022-2023, Joe Xue(lgxue@hotmail.com)
 
 PROJ           = luaos
 SRCDIR         = src lua-5.4.4
-BUILDDIR       = build
+BUILDDIR       = output
 SCRIPTDIR      = script
+ROOTFSDIR      = rootfs
 
-SRC_NOT_BUILD  = lua-5.4.4/src/luac.c lua-5.4.4/src/lua.c src/driver/virtio/virtio_mmio.c src/driver/virtio/virtio_syscall.c
+SRC_NOT_BUILD  = lua-5.4.4/src/luac.c
 
-SRC            = $(filter-out $(SRC_NOT_BUILD), $(shell find $(SRCDIR) -name *.c -o -name *.S))
+SRC            = $(filter-out $(SRC_NOT_BUILD), $(shell find $(SRCDIR) -name *.c -o -name *.S -o -name *.lua))
 OBJS           = $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SRC)))
+
+FILES          = $(shell find $(ROOTFSDIR) -type f)
 
 CFLAGS         = -g -Wall -MMD -Ilua-5.4.4/src
 
-SYSROOT        = /opt/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf/aarch64-none-elf
+SYSROOT        = /opt/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/aarch64-none-elf
 CROSS_COMPILE  = $(SYSROOT)/../bin/aarch64-none-elf-
 CC             = $(CROSS_COMPILE)gcc
+
+QUIET          = @
 
 .PHONY: all clean run
 
 all: $(BUILDDIR)/$(PROJ).elf
 
 $(BUILDDIR)/$(PROJ).elf: $(OBJS)
-	$(CC) -static -T $(SCRIPTDIR)/$(PROJ).ld $^ -nostdlib -lc -lm -lgcc -o $@
+	$(QUIET)$(CC) -static -T $(SCRIPTDIR)/$(PROJ).ld $^ -nostdlib -lc -lm -lgcc -o $@
 
 run: $(BUILDDIR)/$(PROJ).elf
-	@qemu-system-aarch64 \
+	$(QUIET)qemu-system-aarch64 \
 		-M virt \
-		-m 128 \
+		-m 16 \
 		-cpu cortex-a53 \
 		-nographic \
 		-serial mon:stdio \
@@ -37,9 +42,38 @@ run: $(BUILDDIR)/$(PROJ).elf
 clean:
 	-rm -rf $(BUILDDIR)
 
-$(BUILDDIR)/%.o : %
-	echo $@
-	-mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BUILDDIR)/%.c.o : %.c
+	$(QUIET)echo $@
+	$(QUIET)-mkdir -p $(@D)
+	$(QUIET)$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/%.S.o : %.S
+	$(QUIET)echo $@
+	$(QUIET)-mkdir -p $(@D)
+	$(QUIET)$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/$(ROOTFSDIR)/ramfs: $(FILES)
+	$(QUIET)echo $@
+	$(QUIET)-mkdir -p $(@D)
+	$(QUIET)echo "local ramfs = {}" > $@
+	$(QUIET)for f in $(FILES); do \
+		n=`basename $$f`; \
+	   	echo "local fc = [==[" >> $@; \
+		cat $$f >> $@; \
+		echo "]==]" >> $@; \
+		echo "table.insert(ramfs, {\"$$n\", fc})" >> $@; \
+		done
+
+# convert the lua file into c char[]
+.NOTPARALLEL: $(BUILDDIR)/%.lua.o
+$(BUILDDIR)/%.lua.o : %.lua $(FILES) $(BUILDDIR)/$(ROOTFSDIR)/ramfs
+	$(QUIET)echo $@
+	$(QUIET)-mkdir -p $(@D)
+	$(QUIET)echo "unsigned char $(basename $(<F))[] = {" > $@.c
+	$(QUIET)cat $(BUILDDIR)/$(ROOTFSDIR)/ramfs | xxd -i >> $@.c
+	$(QUIET)echo "," >> $@.c
+	$(QUIET)cat $< | xxd -i >> $@.c
+	$(QUIET)echo ", 0x00 };" >> $@.c
+	$(QUIET)$(CC) $(CFLAGS) -c $@.c -o $@
 
 -include $(wildcard $(BUILDDIR)/*.d)

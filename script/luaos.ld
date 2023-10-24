@@ -1,5 +1,5 @@
 /*
- * 128M memory map
+ * 16M memory map
  * qemu starts a53 kernel from 0x40080000
  */
 
@@ -14,6 +14,6 @@ SECTIONS
     .bss  : ALIGN(8) { *(.bss*)  }
     . = ALIGN(8);
     _end = .;
-    . = 0x40000000 + 0x8000000;
+    . = 0x40000000 + 0x1000000;
     stack_top = .;
 }

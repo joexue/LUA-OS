@@ -1,10 +1,15 @@
 #include <stdio.h>
 
-extern void shell(void);
+extern unsigned char lua_os[];
+extern int main(int argc, char *argv[]);
 
 void init()
 {
-    shell();
+    char *argv[] = {"lua", "-e", (char *)lua_os, NULL};
+
+    main(3, argv);
+
+    printf("Exit the Lua OS\n");
     while(1) {
         ;
     }
