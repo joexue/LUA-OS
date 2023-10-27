@@ -1,25 +1,19 @@
 --[[
 -- Lua-OS: Writed by Lua, execute lua
+-- The ramfs is built in by build system and attach to this Lua context
 --]]
 
 -- ls
 local function ls(para)
-    local i
-    for i = 1, #ramfs do
-        print(ramfs[i][1])
+    for n, _ in pairs(ramfs) do
+        print(n)
     end
 end
 
 -- cat
 local function cat(file)
-    local i
-    for i = 1, #ramfs do
-        if file == ramfs[i][1] then
-            print(ramfs[i][2])
-            return
-        end
-    end
-    print("No file: " .. file)
+    local f = ramfs[file]
+    print(f or "No file: " .. file)
 end
 
 -- help
@@ -32,11 +26,20 @@ local function help()
 end
 
 local commands = {
-    {"ls",   ls},
-    {"cat",  cat},
-    {"help", help},
-    {"?" ,   help},
+    ["ls"]   = ls,
+    ["cat"]  = cat,
+    ["?"]    = help,
+    ["help"] = help,
 }
+
+-- execute the Lua script
+local function execute(script, largs)
+    local func = load(script)
+    local status, err = pcall(func, largs)
+    if not status then
+        print(err)
+    end
+end
 
 -- Lua-OS shell
 local function shell(str)
@@ -55,43 +58,24 @@ local function shell(str)
     end
 
     -- commands
-    local i
-    for i = 1, #commands do
-        if commands[i][1] == cmd then
-            commands[i][2](largs)
-            return
-        end
+    local c = commands[cmd]
+    if c then
+        return c(largs)
     end
 
     -- file
-    for i = 1, #ramfs do
-        if ramfs[i][1] == cmd then
-            local func = load(ramfs[i][2])
-            local status, err = pcall(func, largs)
-            return
-        end
+    local f = ramfs[cmd]
+    if f then
+        return execute(f, largs)
     end
 
-    -- script
-    local func = load(str)
-    local status, err = pcall(func)
-    if not status then
-        print(err)
-    end
-    return
+    -- script from stdin
+    return execute(str)
 end
 
--- Lua OS entry
--- find the LOGO.txt in ramfs
-local i, logo
-for i = 1, #ramfs do
-    if ramfs[i][1] == "LOGO.txt" then
-        logo = ramfs[i][2]
-        break
-    end
-end
-
-print(logo)
+-- Lua-OS entry
+-- Show the LOGO.txt in ramfs
+print(ramfs["LOGO.txt"] or "")
 
 while true do
     io.write ("Lua-OS # ")
@@ -99,7 +83,6 @@ while true do
     s = io.read("*l")
 
     if (s == nil) then
-        print("nil")
         break
     end
 

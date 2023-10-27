@@ -61,7 +61,7 @@ $(BUILDDIR)/$(ROOTFSDIR)/ramfs: $(FILES)
 	   	echo "local fc = [==[" >> $@; \
 		cat $$f >> $@; \
 		echo "]==]" >> $@; \
-		echo "table.insert(ramfs, {\"$$n\", fc})" >> $@; \
+		echo "ramfs[\"$$n\"] = fc" >> $@; \
 		done
 
 # convert the lua file into c char[]
