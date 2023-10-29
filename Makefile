@@ -20,12 +20,16 @@ CFLAGS         = -g -Wall -MMD -Ilua-5.4.4/src
 SYSROOT        = /opt/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/aarch64-none-elf
 CROSS_COMPILE  = $(SYSROOT)/../bin/aarch64-none-elf-
 CC             = $(CROSS_COMPILE)gcc
+OBJCOPY        = $(CROSS_COMPILE)objcopy
 
 QUIET          = @
 
 .PHONY: all clean run
 
-all: $(BUILDDIR)/$(PROJ).elf
+all: $(BUILDDIR)/$(PROJ).bin
+
+$(BUILDDIR)/$(PROJ).bin: $(BUILDDIR)/$(PROJ).elf
+	$(QUIET)$(OBJCOPY) -O binary $^ $@
 
 $(BUILDDIR)/$(PROJ).elf: $(OBJS)
 	$(QUIET)$(CC) -static -T $(SCRIPTDIR)/$(PROJ).ld $^ -nostdlib -lc -lm -lgcc -o $@
@@ -37,7 +41,7 @@ run: $(BUILDDIR)/$(PROJ).elf
 		-cpu cortex-a53 \
 		-nographic \
 		-serial mon:stdio \
-		-kernel $(BUILDDIR)/$(PROJ).elf
+		-kernel $(BUILDDIR)/$(PROJ).bin
 
 clean:
 	-rm -rf $(BUILDDIR)
