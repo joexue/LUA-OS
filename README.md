@@ -12,8 +12,11 @@ It can run on the bare metal aarch64 machine, in this project, for the convenien
 * 1 install qemu-system-arm
 * 2 install arm toolchain "AArch64 bare-metal target (aarch64-none-elf)" verion
 * 3 checkout the code and change the Makefile to provie your toolchain path, then run "make run"
-  
-# Screenshot
 
-![image](https://github.com/user-attachments/assets/c93cf99d-e7fe-4d26-8429-c78ca4be583f)
+# Write your own Lua code and run
+* 1 write your Lua code
+* 2 put it into rootfs folder in this project
+* 3 make run, you will see your file there, "ls" command to list it, "cat <file name>" to show the content, <file name> to execute it.
+# Screenshot
+![image](https://github.com/user-attachments/assets/6201c8b6-d035-4fa7-818a-5b7bb91f3f65)
 
