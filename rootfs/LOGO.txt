@@ -4,4 +4,4 @@
 | |__| |_| | (_| |  | |_| |___) |
 |_____\__,_|\__,_|   \___/|____/
 
-Writen by Lua, execute Lua
+Written by Lua, execute Lua
